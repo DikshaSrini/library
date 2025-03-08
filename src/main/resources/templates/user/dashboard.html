@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User Dashboard</title>
+</head>
+<body>
+<h1>User Dashboard</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Genre</th>
+        <th>Publication Year</th>
+        <th>Availability</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="book : ${books}">
+        <td th:text="${book.title}"></td>
+        <td th:text="${book.author}"></td>
+        <td th:text="${book.genre}"></td>
+        <td th:text="${book.publicationYear}"></td>
+        <td th:text="${book.available} ? 'Available' : 'Not Available'"></td>
+        <td>
+            <form th:if="${book.available}" th:action="@{/user/borrow-book}" method="post">
+                <input type="hidden? name=" bookId? th:value="${book.id}">
+                <button type="submit">Borrow</button>
+            </form>
+            <form th:unless="${book.available}" th:action="@{/user/return-book}" method="post">
+                <input type="hidden? name=" bookId? th:value="${book.id}">
+                <button type="submit">Return</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
