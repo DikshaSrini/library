@@ -3,11 +3,13 @@ package com.example.library.controller;
 import com.example.library.model.User;
 import com.example.library.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AuthController {
@@ -28,12 +30,22 @@ public class AuthController {
         return "register";
     }
 
-    // ✅ Add this method to handle form submissions
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword())); // Encrypt password
+    public String registerUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
+        System.out.println("Received user: " + user);
+
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            redirectAttributes.addFlashAttribute("error", "Password cannot be empty");
+            return "redirect:/register";
+        }
+
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
         userRepository.save(user);
-        return "redirect:/login"; // Redirect to login after successful registration
+        System.out.println("User saved!");
+
+        return "redirect:/login"; // Redirect to login page
     }
 
     @GetMapping("/redirectBasedOnRole")
