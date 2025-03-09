@@ -4,7 +4,9 @@
     <title>User Dashboard</title>
 </head>
 <body>
+
 <h1>User Dashboard</h1>
+
 <table>
     <thead>
     <tr>
@@ -25,16 +27,17 @@
         <td th:text="${book.available} ? 'Available' : 'Not Available'"></td>
         <td>
             <form th:if="${book.available}" th:action="@{/user/borrow-book}" method="post">
-                <input type="hidden? name=" bookId? th:value="${book.id}">
+                <input type="hidden? name="bookId? th:value="${book.id}">
                 <button type="submit">Borrow</button>
             </form>
             <form th:unless="${book.available}" th:action="@{/user/return-book}" method="post">
-                <input type="hidden? name=" bookId? th:value="${book.id}">
+                <input type="hidden? name="bookId? th:value="${book.id}">
                 <button type="submit">Return</button>
             </form>
         </td>
     </tr>
     </tbody>
 </table>
+
 </body>
 </html>

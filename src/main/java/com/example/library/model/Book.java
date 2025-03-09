@@ -2,6 +2,7 @@ package com.example.library.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "books") // Map to the "books" collection
 public class Book {
@@ -10,6 +11,7 @@ public class Book {
     private String title;
     private String author;
     private String genre;
+    @Field("pub_year")
     private int publicationYear;
     private boolean available;
 

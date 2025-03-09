@@ -1,9 +1,14 @@
-package com.example.library.config;
+package com.example.library.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -14,25 +19,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity
+        return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll() // Allow registration, login, and static resources
-                        .requestMatchers("/user/**").hasRole("USER") // Restrict /user/** to USER role
-                        .anyRequest().authenticated() // Secure all other endpoints
+                        .requestMatchers("/user/dashboard").authenticated()  // Only authenticated users can access
+                        .anyRequest().permitAll()  // Allow others (register, login, etc.)
                 )
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login") // Custom login page
-                        .defaultSuccessUrl("/user/dashboard", true) // Redirect to user dashboard after login
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/user/dashboard", true)  // Redirect after login
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
-                        .permitAll()
-                );
-
-        return http.build();
+                        .logoutSuccessUrl("/login?logout")
+                )
+                .csrf(csrf -> csrf.disable())  // Keep disabled only if necessary
+                .build();
     }
 
     @Bean

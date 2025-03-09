@@ -5,9 +5,13 @@ import com.example.library.model.User;
 import com.example.library.service.BookService;
 import com.example.library.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLOutput;
 
 @Controller
 @RequestMapping("/user")
@@ -17,9 +21,14 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    private User user;
 
     @GetMapping("/dashboard")
     public String userDashboard(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Logged-in User: " + auth.getName());
+        System.out.println("Roles: " + auth.getAuthorities());
+
         model.addAttribute("books", bookService.findAll());
         return "user/dashboard";
     }
@@ -56,7 +65,7 @@ public class UserController {
             @RequestParam String password,
             @RequestParam String role) {
         // Call the UserService to register the user
-        userService.registerUser(username, password, role);
+        userService.registerUser(user);
         return "redirect:/user/dashboard"; // Redirect to dashboard after registration
     }
 }

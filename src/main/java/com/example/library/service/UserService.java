@@ -2,32 +2,60 @@ package com.example.library.service;
 
 import com.example.library.model.User;
 import com.example.library.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
-public class UserService {
-    @Autowired
-    private UserRepository userRepository;
+public class UserService implements UserDetailsService {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public void registerUser(String username, String password, String role) {
-        // Debug: Print the received parameters
-        System.out.println("Registering user - Username: " + username + ", Role: " + role);
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-        // Hash the password
-        String hashedPassword = passwordEncoder.encode(password);
-        System.out.println("Hashed password: " + hashedPassword);
+    public User registerUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword())); // Hash password
+        User savedUser = userRepository.save(user);
+        System.out.println("✅ User registered successfully: " + savedUser.getUsername());
+        return savedUser;
+    }
 
-        // Create a new user
-        User user = new User(username, hashedPassword, role);
-        System.out.println("User object created: " + user);
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // Save the user to MongoDB
-        userRepository.save(user);
-        System.out.println("User saved to MongoDB");
+        System.out.println("🔍 User found: " + user.getUsername());
+        System.out.println("🔑 Stored password (hashed): " + user.getPassword());
+
+        return user;
+    }
+
+    public boolean authenticate(String username, String rawPassword) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+
+        if (optionalUser.isEmpty()) {
+            System.out.println("❌ User not found: " + username);
+            return false;
+        }
+
+        User user = optionalUser.get();
+        boolean matches = passwordEncoder.matches(rawPassword, user.getPassword());
+
+        if (matches) {
+            System.out.println("✅ Password matches for user: " + username);
+        } else {
+            System.out.println("❌ Incorrect password for user: " + username);
+        }
+
+        return matches;
     }
 }
