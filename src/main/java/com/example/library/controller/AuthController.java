@@ -3,7 +3,6 @@ package com.example.library.controller;
 import com.example.library.model.User;
 import com.example.library.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,14 +52,16 @@ public class AuthController {
         for (GrantedAuthority authority : authentication.getAuthorities()) {
             String role = authority.getAuthority();
             switch (role) {
-                case "ROLE_ADMIN":
+                case "ADMIN":
                     return "redirect:/admin/dashboard";
-                case "ROLE_LIBRARIAN":
+                case "LIBRARIAN":
                     return "redirect:/librarian/dashboard";
-                case "ROLE_USER":
+                case "USER":
                     return "redirect:/user/dashboard";
+                default:
+                    return "redirect:/login"; // Default redirect if no role is found
             }
         }
-        return "redirect:/login"; // Default redirect if no role is found
+        return "redirect:/login"; // Default redirect if no authorities are found
     }
 }
